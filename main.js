@@ -360,51 +360,22 @@ function setupScanner() {
       </div>`;
 
     try {
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 1000,
-          system: `You are DermaVision's AI skin analysis engine.
-Analyze the skin image provided and return ONLY a JSON object with no markdown, no preamble, no code fences.
+      // TODO: Connect with Keras model
+      // Example of expected result structure from the Keras evaluation:
+      const result = {
+        isSkinImage: true,
+        observation: "Keras model connection pending.",
+        potentialConditions: [],
+        severity: "none",
+        recommendations: ["Update main.js to parse the output from your Keras model."],
+        seekDoctorIf: "",
+        disclaimer: "This analysis is for informational purposes only and does not constitute medical advice."
+      };
 
-Required JSON format:
-{
-  "isSkinImage": true or false,
-  "notSkinReason": "explanation if not skin image",
-  "observation": "What you see in the image (2–3 sentences)",
-  "potentialConditions": ["condition 1", "condition 2"],
-  "severity": "none" | "mild" | "moderate" | "severe",
-  "recommendations": ["step 1", "step 2", "step 3"],
-  "seekDoctorIf": "one sentence describing when to see a doctor",
-  "disclaimer": "This analysis is for informational purposes only and does not constitute medical advice. Please consult a qualified dermatologist for any medical concerns."
-}
-
-Rules:
-- If the image is not of human skin, set isSkinImage: false and explain in notSkinReason.
-- potentialConditions should list 1–3 possibilities or be an empty array if skin looks healthy.
-- Be informative and clear, never alarmist.
-- recommendations must be practical and actionable.`,
-          messages: [{
-            role: 'user',
-            content: [
-              { type: 'image', source: { type: 'base64', media_type: uploadedMime, data: uploadedBase64 } },
-              { type: 'text', text: 'Please analyze this skin image and return your assessment as JSON.' }
-            ]
-          }]
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error('Analysis failed (API error or key missing). Please ensure your backend is correctly configured.'); 
-      }
-
-      const data = await response.json();
-      const raw  = (data.content || []).map(b => b.text || '').join('');
-      let result = JSON.parse(raw.replace(/```json|```/g, '').trim());
+      // Simulate a small processing delay for UX
+      await new Promise(r => setTimeout(r, 1000));
+      
       renderResults(result);
-
     } catch (err) {
       showError(err.message || "An error occurred during analysis.");
     } finally {
